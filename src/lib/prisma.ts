@@ -5,6 +5,8 @@ import { PrismaClient } from "../../prisma/generated/prisma/client";
 import config from "../config";
 // import { PrismaClient } from "../../prisma/src/generated/prisma/client";
 // Initialize the adapter according to your driver's requirements
+
+const  connectionString=`${process.env.DATABASE_URL}`;
 const adapter = new PrismaPg({ connectionString: config.DATABASE_URL });
 // Pass the adapter instance to PrismaClient
 const prisma = new PrismaClient({ adapter });
