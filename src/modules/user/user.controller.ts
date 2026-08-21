@@ -1,18 +1,33 @@
 import prisma from "../../lib/prisma";
 import { catchAsync } from "../../utils/catch-async";
-import type{Request,Response} from "express"
+import type { Request, Response } from "express";
 import { sendResponse } from "../../utils/send-response";
+import { UserStatus } from "../../../prisma/generated/prisma/enums";
 
+export const getUsers = catchAsync(
+  async (req: Request, res: Response) => {
+    const users = await prisma.user.findMany({
+      where: {
+        status: UserStatus.ACTIVE,
+      },
 
-export const getUsers=catchAsync(async(res:Request,res:Response)=>{
+      orderBy: {
+        createdAt: "desc",
+      },
 
-    const user=await prisma.user.findMany({
-     where:{
-   isAvailable:true
-     },
-        orderBy:{
-createdAt:"desc"
-        }
-    })
-    sendResponse(res,{message:"users retrived successfully",data:{user}})
-})
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+        createdAt: true,
+      },
+    });
+
+    sendResponse(res, {
+      message: "Users retrieved successfully",
+      data: users,
+    });
+  }
+);

@@ -9,15 +9,34 @@ import { catchAsync } from "../../utils/catch-async";
 import { authService } from "./auth.service";
 import { sendResponse } from "../../utils/send-response";
 
+const registerUser = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const result = await authService.registerUser(req.body);
+
+    sendResponse(
+      res,
+      {
+        message: "User registered successfully",
+        data: result,
+      },
+      httpStatus.CREATED
+    );
+  }
+);
+
 const loginUser = catchAsync(
   async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
-    const payload = req.body;
-
-    const loginResult = await authService.loginUser(payload);
+    const loginResult = await authService.loginUser(
+      req.body
+    );
 
     sendResponse(
       res,
@@ -31,5 +50,6 @@ const loginUser = catchAsync(
 );
 
 export const authController = {
+  registerUser,
   loginUser,
 };

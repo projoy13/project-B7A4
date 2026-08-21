@@ -1,11 +1,45 @@
 import bcrypt from "bcryptjs";
 import prisma from "../../lib/prisma";
-import type { ILoginUser } from "./auth.interface";
+
+import type {
+  ILoginUser,
+  IRegisterUser,
+} from "./auth.interface";
+
 import { jwtUtils } from "../../utils/jwt";
 import config from "../../config";
 import type { SignOptions } from "jsonwebtoken";
 
-const loginUser = async (payload: ILoginUser) => {
+const registerUser = async (
+  payload: IRegisterUser
+) => {
+  const { name, email, password, role } = payload;
+
+
+ 
+  const hashedPassword = await bcrypt.hash(
+    password,
+    10
+  );
+
+  const user = await prisma.user.create({
+    data: {
+      name,
+      email,
+      password: hashedPassword,
+      role,
+    },
+  });
+
+  // Remove password before sending user data
+  const { password: _, ...userWithoutPassword } = user;
+
+  return userWithoutPassword;
+};
+
+const loginUser = async (
+  payload: ILoginUser
+) => {
   const { email, password } = payload;
 
   const user = await prisma.user.findUniqueOrThrow({
@@ -33,13 +67,13 @@ const loginUser = async (payload: ILoginUser) => {
   const accessToken = jwtUtils.createToken(
     jwtPayload,
     config.jwt_access_secret,
-    config.jwt_access_expire_in  as SignOptions,
+    config.jwt_access_expire_in as SignOptions
   );
 
   const refreshToken = jwtUtils.createToken(
     jwtPayload,
     config.jwt_refresh_secret,
-    config.jwt_refresh_expire_in as SignOptions,
+    config.jwt_refresh_expire_in as SignOptions
   );
 
   return {
@@ -49,5 +83,6 @@ const loginUser = async (payload: ILoginUser) => {
 };
 
 export const authService = {
+  registerUser,
   loginUser,
 };
