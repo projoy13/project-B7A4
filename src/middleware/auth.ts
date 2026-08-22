@@ -4,47 +4,51 @@ import type {
   Response,
 } from "express";
 
-import jwt from "jsonwebtoken";
 import { catchAsync } from "../utils/catch-async";
+import { AppError } from "../utils/app.error";
+import { jwtUtils } from "../utils/jwt";
 import config from "../config";
 
-const auth = () => {
+export const auth = (...requiredRoles: string[]) => {
   return catchAsync(
     async (
       req: Request,
       res: Response,
       next: NextFunction
     ) => {
-      let token: string | undefined;
+      const authorization = req.headers.authorization;
 
-      // Get token from cookie
-      if (req.cookies?.accessToken) {
-        token = req.cookies.accessToken;
+      if (!authorization) {
+        throw new AppError(401, "You are not authorized");
       }
 
-      // Get token from Authorization header
-      if (
-        !token &&
-        req.headers.authorization?.startsWith("Bearer ")
-      ) {
-        token = req.headers.authorization.split(" ")[1];
-      }
+      const token = authorization.startsWith("Bearer ")
+        ? authorization.slice(7)
+        : authorization;
 
-      if (!token) {
-        throw new Error("You are not authorized");
-      }
-
-      // Verify token
-      const decoded = jwt.verify(
+      const decoded = jwtUtils.verifyToken(
         token,
-        config.jwt_access_secret as string
-      );
+        config.jwt_access_secret
+      ) as {
+        id: string;
+        name: string;
+        email: string;
+        role: string;
+      };
 
-      console.log(decoded);
+      if (
+        requiredRoles.length > 0 &&
+        !requiredRoles.includes(decoded.role)
+      ) {
+        throw new AppError(
+          403,
+          "You do not have permission"
+        );
+      }
+
+      req.user = decoded;
 
       next();
     }
   );
 };
-
-export default auth;

@@ -7,6 +7,8 @@ import { globalErrorHandler } from "./middleware/global-error";
 
 import { authRoutes } from "./modules/auth/auth.route";
 import userRouter from "./modules/user/user.route";
+import { gearRouter } from "./modules/gear/gear.route";
+// import gearRouter  from "./modules/gear/gear.route";
 
 const app: Application = express();
 
@@ -33,6 +35,9 @@ app.use("/api/auth", authRoutes);
 
 
 app.use("/api/users", userRouter);
+
+
+app.use("/api/gear", gearRouter);
 
 
 app.get("/", (_req, res) => {
