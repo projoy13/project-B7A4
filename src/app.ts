@@ -11,6 +11,7 @@ import { gearRouter } from "./modules/gear/gear.route";
 import { categoryRouter } from "./modules/category/category.route";
 import { paymentRouter } from "./modules/payment/payment.route";
 import { rentalRouter } from "./modules/rental/rental.route";
+import reviewRouter from "./modules/review/review.route";
 // import gearRouter  from "./modules/gear/gear.route";
 
 const app: Application = express();
@@ -51,6 +52,8 @@ app.use("/api/rentals", rentalRouter);
 // payment
 app.use('/api/payments',paymentRouter)
 
+// review
+app.use("/api/reviews", reviewRouter);
 
 app.get("/", (_req, res) => {
   res.send("GearUp server is running");
