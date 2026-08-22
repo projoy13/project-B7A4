@@ -9,6 +9,8 @@ import { authRoutes } from "./modules/auth/auth.route";
 import userRouter from "./modules/user/user.route";
 import { gearRouter } from "./modules/gear/gear.route";
 import { categoryRouter } from "./modules/category/category.route";
+import { paymentRouter } from "./modules/payment/payment.route";
+import { rentalRouter } from "./modules/rental/rental.route";
 // import gearRouter  from "./modules/gear/gear.route";
 
 const app: Application = express();
@@ -31,17 +33,23 @@ app.use(
 app.use(cookieParser());
 
 
-// Routes
+// auth
 app.use("/api/auth", authRoutes);
 
-
-app.use("/api/users", userRouter);
+// user
+app.use("/api/admin/users", userRouter);
 
 // gear
 app.use("/api/gear", gearRouter);
 
 // gear categoty
 app.use("/api/categories", categoryRouter);
+
+// 
+app.use("/api/rentals", rentalRouter);
+
+// payment
+app.use('/api/payments',paymentRouter)
 
 
 app.get("/", (_req, res) => {
