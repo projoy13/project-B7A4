@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import prisma from "../../lib/prisma";
+import type { StringValue } from "ms";
 
 import type {
   ILoginUser,
@@ -8,18 +9,29 @@ import type {
 
 import { jwtUtils } from "../../utils/jwt";
 import config from "../../config";
-import type { SignOptions } from "jsonwebtoken";
+import { AppError } from "../../utils/app.error";
 
 const registerUser = async (
   payload: IRegisterUser
 ) => {
   const { name, email, password, role } = payload;
 
+  const existingUser = await prisma.user.findUnique({
+    where: {
+      email,
+    },
+  });
 
- 
+  if (existingUser) {
+    throw new AppError(
+      409,
+      "User already exists with this email"
+    );
+  }
+
   const hashedPassword = await bcrypt.hash(
     password,
-    10
+    config.bcrypt_salt_round
   );
 
   const user = await prisma.user.create({
@@ -31,7 +43,6 @@ const registerUser = async (
     },
   });
 
-  // Remove password before sending user data
   const { password: _, ...userWithoutPassword } = user;
 
   return userWithoutPassword;
@@ -42,11 +53,25 @@ const loginUser = async (
 ) => {
   const { email, password } = payload;
 
-  const user = await prisma.user.findUniqueOrThrow({
+  const user = await prisma.user.findUnique({
     where: {
       email,
     },
   });
+
+  if (!user) {
+    throw new AppError(
+      404,
+      "User not found"
+    );
+  }
+
+  if (user.status === "SUSPENDED") {
+    throw new AppError(
+      403,
+      "Your account has been suspended"
+    );
+  }
 
   const isPasswordMatched = await bcrypt.compare(
     password,
@@ -54,7 +79,10 @@ const loginUser = async (
   );
 
   if (!isPasswordMatched) {
-    throw new Error("Password is incorrect");
+    throw new AppError(
+      401,
+      "Password is incorrect"
+    );
   }
 
   const jwtPayload = {
@@ -67,13 +95,17 @@ const loginUser = async (
   const accessToken = jwtUtils.createToken(
     jwtPayload,
     config.jwt_access_secret,
-    config.jwt_access_expire_in as SignOptions
+    {
+      expiresIn: config.jwt_access_expire_in as StringValue,
+    }
   );
 
   const refreshToken = jwtUtils.createToken(
     jwtPayload,
     config.jwt_refresh_secret,
-    config.jwt_refresh_expire_in as SignOptions
+    {
+      expiresIn: config.jwt_refresh_expire_in as StringValue,
+    }
   );
 
   return {

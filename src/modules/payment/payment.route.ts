@@ -8,7 +8,7 @@ paymentRouter.post(
   PaymentController.createPayment
 );
 
-paymentRouter.post(
+paymentRouter.patch(
   "/confirm/:id",
   PaymentController.confirmPayment
 );
