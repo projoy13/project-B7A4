@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { CategoryController } from "./category.controller";
+import { auth } from "../../middleware/auth";
 
 export const categoryRouter = Router();
 
 categoryRouter.post(
-  "/",
+  "/",auth("ADMIN"),
   CategoryController.createCategory
 );
 
@@ -19,11 +20,11 @@ categoryRouter.get(
 );
 
 categoryRouter.patch(
-  "/:id",
+  "/:id",auth("ADMIN"),
   CategoryController.updateCategory
 );
 
 categoryRouter.delete(
-  "/:id",
+  "/:id",auth("ADMIN"),
   CategoryController.deleteCategory
 );

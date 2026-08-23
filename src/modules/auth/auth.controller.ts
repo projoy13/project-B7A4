@@ -48,8 +48,29 @@ const loginUser = catchAsync(
     );
   }
 );
+const getMe = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return next(new Error("User is not authenticated"));
+    }
+
+    const result = await authService.getMe(
+      req.user.id
+    );
+
+    sendResponse(
+      res,
+      {
+        message: "User profile retrieved successfully",
+        data: result,
+      },
+      httpStatus.OK
+    );
+  }
+);
 
 export const authController = {
   registerUser,
   loginUser,
+  getMe
 };

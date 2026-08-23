@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { ReviewController } from "./review.controller";
+import { auth } from "../../middleware/auth";
 
 const reviewRouter = Router();
 
 reviewRouter.post(
-  "/",
+  "/",auth("COUSTOMER"),
   ReviewController.createReview
 );
 
