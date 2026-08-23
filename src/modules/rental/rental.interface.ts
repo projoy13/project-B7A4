@@ -9,3 +9,13 @@ export interface ICreateRental {
   endDate: string;
   items: IRentalItem[];
 }
+
+export interface IUpdateRentalStatus {
+  status:
+    | "PLACED"
+    | "CONFIRMED"
+    | "CANCELLED"
+    | "PAID"
+    | "PICKED_UP"
+    | "RETURNED";
+}

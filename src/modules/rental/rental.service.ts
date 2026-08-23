@@ -1,6 +1,6 @@
 import prisma from "../../lib/prisma";
 import { AppError } from "../../utils/app.error";
-import type { ICreateRental } from "./rental.interface";
+import type { ICreateRental, IUpdateRentalStatus } from "./rental.interface";
 
 const createRental = async (payload: ICreateRental) => {
   const {
@@ -228,8 +228,34 @@ const getSingleRental = async (id: string) => {
   return result;
 };
 
+const updateRentalStatus = async (
+  id: string,
+  payload: IUpdateRentalStatus
+) => {
+  const rental = await prisma.rentalOrder.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!rental) {
+    throw new AppError(404, "Rental order not found");
+  }
+
+  const result = await prisma.rentalOrder.update({
+    where: {
+      id,
+    },
+    data: {
+      status: payload.status,
+    },
+  });
+
+  return result;
+};
 export const RentalService = {
   createRental,
   getAllRentals,
   getSingleRental,
+  updateRentalStatus
 };

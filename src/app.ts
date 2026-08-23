@@ -46,7 +46,7 @@ app.use("/api/gear", gearRouter);
 // gear categoty
 app.use("/api/categories", categoryRouter);
 
-// 
+// rentals
 app.use("/api/rentals", rentalRouter);
 
 // payment
