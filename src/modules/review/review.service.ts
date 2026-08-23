@@ -1,31 +1,36 @@
 import prisma from "../../lib/prisma";
+
 import { AppError } from "../../utils/app.error";
-import type { ICreateReview } from "./review.interface";
+
+import type {
+  ICreateReview,
+  IUpdateReview,
+} from "./review.interface";
+
+
+// ===============================
+// CREATE REVIEW
+// ===============================
 
 const createReview = async (
+  userId: string,
   payload: ICreateReview
 ) => {
   const {
     rating,
     comment,
-    userId,
     gearItemId,
   } = payload;
 
-  // Validate rating
-  if (rating < 1 || rating > 5) {
-    throw new AppError(
-      400,
-      "Rating must be between 1 and 5"
-    );
-  }
 
   // Check user
-  const user = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-  });
+
+  const user =
+    await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
 
   if (!user) {
     throw new AppError(
@@ -34,12 +39,15 @@ const createReview = async (
     );
   }
 
+
   // Check gear
-  const gear = await prisma.gearItem.findUnique({
-    where: {
-      id: gearItemId,
-    },
-  });
+
+  const gear =
+    await prisma.gearItem.findUnique({
+      where: {
+        id: gearItemId,
+      },
+    });
 
   if (!gear) {
     throw new AppError(
@@ -48,66 +56,100 @@ const createReview = async (
     );
   }
 
-  // Create review
- const review = await prisma.review.create({
-  data: {
-    rating,
-    userId,
-    gearItemId,
 
-    ...(comment !== undefined && {
-      comment,
-    }),
-  },
+  // Check whether user already reviewed
+  // this gear
 
-  include: {
-    user: {
-      select: {
-        id: true,
-        name: true,
-        email: true,
+  const existingReview =
+    await prisma.review.findFirst({
+      where: {
+        userId,
+        gearItemId,
       },
-    },
+    });
 
-    gearItem: true,
-  },
-});
+  if (existingReview) {
+    throw new AppError(
+      409,
+      "You have already reviewed this gear"
+    );
+  }
+
+
+  // Create review
+
+  const review =
+    await prisma.review.create({
+      data: {
+        rating,
+        userId,
+        gearItemId,
+
+        ...(comment !== undefined && {
+          comment,
+        }),
+      },
+
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+
+        gearItem: true,
+      },
+    });
+
 
   return review;
 };
 
-// Get all reviews
+
+// ===============================
+// GET ALL REVIEWS
+// ===============================
+
 const getAllReviews = async () => {
-  const reviews = await prisma.review.findMany({
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
+  const reviews =
+    await prisma.review.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
         },
+
+        gearItem: true,
       },
 
-      gearItem: true,
-    },
-
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
 
   return reviews;
 };
 
-// Get reviews for a specific gear
+
+// ===============================
+// GET REVIEWS BY GEAR
+// ===============================
+
 const getReviewsByGear = async (
   gearItemId: string
 ) => {
-  const gear = await prisma.gearItem.findUnique({
-    where: {
-      id: gearItemId,
-    },
-  });
+
+  // Check gear
+
+  const gear =
+    await prisma.gearItem.findUnique({
+      where: {
+        id: gearItemId,
+      },
+    });
 
   if (!gear) {
     throw new AppError(
@@ -116,49 +158,60 @@ const getReviewsByGear = async (
     );
   }
 
-  const reviews = await prisma.review.findMany({
-    where: {
-      gearItemId,
-    },
 
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
+  // Get reviews
+
+  const reviews =
+    await prisma.review.findMany({
+      where: {
+        gearItemId,
+      },
+
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
         },
       },
-    },
 
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
 
   return reviews;
 };
 
-// Get single review
+
+// ===============================
+// GET SINGLE REVIEW
+// ===============================
+
 const getSingleReview = async (
   id: string
 ) => {
-  const review = await prisma.review.findUnique({
-    where: {
-      id,
-    },
 
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-        },
+  const review =
+    await prisma.review.findUnique({
+      where: {
+        id,
       },
 
-      gearItem: true,
-    },
-  });
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+
+        gearItem: true,
+      },
+    });
+
 
   if (!review) {
     throw new AppError(
@@ -166,19 +219,31 @@ const getSingleReview = async (
       "Review not found"
     );
   }
+
 
   return review;
 };
 
-// Delete review
-const deleteReview = async (
-  id: string
+
+// ===============================
+// UPDATE REVIEW
+// ===============================
+
+const updateReview = async (
+  id: string,
+  userId: string,
+  payload: IUpdateReview
 ) => {
-  const review = await prisma.review.findUnique({
-    where: {
-      id,
-    },
-  });
+
+  // Find review
+
+  const review =
+    await prisma.review.findUnique({
+      where: {
+        id,
+      },
+    });
+
 
   if (!review) {
     throw new AppError(
@@ -186,6 +251,88 @@ const deleteReview = async (
       "Review not found"
     );
   }
+
+
+  // Check ownership
+
+  if (review.userId !== userId) {
+    throw new AppError(
+      403,
+      "You can only update your own review"
+    );
+  }
+
+
+  // Update
+
+  const updatedReview =
+    await prisma.review.update({
+      where: {
+        id,
+      },
+
+      data: payload,
+
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+
+        gearItem: true,
+      },
+    });
+
+
+  return updatedReview;
+};
+
+
+// ===============================
+// DELETE REVIEW
+// ===============================
+
+const deleteReview = async (
+  id: string,
+  userId: string,
+  role: string
+) => {
+
+  // Find review
+
+  const review =
+    await prisma.review.findUnique({
+      where: {
+        id,
+      },
+    });
+
+
+  if (!review) {
+    throw new AppError(
+      404,
+      "Review not found"
+    );
+  }
+
+
+  // Customer can delete only
+  // their own review.
+  //
+  // Admin can delete any review.
+
+  if (
+    role !== "ADMIN" &&
+    review.userId !== userId
+  ) {
+    throw new AppError(
+      403,
+      "You can only delete your own review"
+    );
+  }
+
 
   await prisma.review.delete({
     where: {
@@ -193,13 +340,16 @@ const deleteReview = async (
     },
   });
 
+
   return null;
 };
+
 
 export const ReviewService = {
   createReview,
   getAllReviews,
   getReviewsByGear,
   getSingleReview,
+  updateReview,
   deleteReview,
 };

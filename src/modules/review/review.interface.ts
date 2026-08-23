@@ -1,6 +1,10 @@
 export interface ICreateReview {
   rating: number;
   comment?: string;
-  userId: string;
   gearItemId: string;
+}
+
+export interface IUpdateReview {
+  rating?: number;
+  comment?: string;
 }
