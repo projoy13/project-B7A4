@@ -4,3 +4,6 @@ export interface ICreatePayment {
   amount: number;
   method: "STRIPE" | "SSLCOMMERZ";
 }
+export interface ICreatePayment {
+  rentalOrderId: string;
+}

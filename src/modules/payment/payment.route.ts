@@ -1,25 +1,45 @@
 import { Router } from "express";
+
 import { PaymentController } from "./payment.controller";
 import { auth } from "../../middleware/auth";
+import { validateRequest } from "../../middleware/validate.request";
+import { paymentValidation } from "./payment.validation";
 
 export const paymentRouter = Router();
 
+
 paymentRouter.post(
-  "/create",auth("COUSTOMER"),
+  "/create",
+  auth("CUSTOMER"),
+  validateRequest(
+    paymentValidation.createPaymentSchema
+  ),
   PaymentController.createPayment
 );
 
-paymentRouter.patch(
-  "/confirm/:id",auth("ADMIN"),
-  PaymentController.confirmPayment
+
+paymentRouter.post(
+  "/checkout/:id",
+  auth("CUSTOMER"),
+  validateRequest(
+    paymentValidation.paymentIdParamsSchema
+  ),
+  PaymentController.checkout
 );
 
+
 paymentRouter.get(
-  "/",auth("ADMIN"),
+  "/",
+  auth("ADMIN"),
   PaymentController.getAllPayments
 );
 
+
 paymentRouter.get(
-  "/:id",auth("ADMIN"),
+  "/:id",
+  auth("ADMIN"),
+  validateRequest(
+    paymentValidation.paymentIdParamsSchema
+  ),
   PaymentController.getSinglePayment
 );

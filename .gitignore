@@ -1,4 +1,11 @@
+node_modules/
+dist/
 
-/src/generated/prisma
+.env
 
-.vercel
+prisma/generated/prisma/
+
+.agents/
+.claude/
+.windsurf/
+.vercel/

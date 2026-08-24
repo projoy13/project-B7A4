@@ -6,6 +6,7 @@ import { AppError } from "../../utils/app.error";
 import { sendResponse } from "../../utils/send-response";
 
 import { RentalService } from "./rental.service";
+import prisma from "../../lib/prisma";
 
 const createRental = catchAsync(
   async (req: Request, res: Response) => {
@@ -26,7 +27,11 @@ const createRental = catchAsync(
 
 const getAllRentals = catchAsync(
   async (req: Request, res: Response) => {
+    console.log("GET ALL RENTALS CONTROLLER STARTED");
+
     const result = await RentalService.getAllRentals();
+
+    console.log("RENTALS RECEIVED:", result.length);
 
     sendResponse(res, {
       message: "Rental orders retrieved successfully",

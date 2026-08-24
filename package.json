@@ -12,7 +12,8 @@
     "deploy": "vercel --prod",
     "db:migrate": "prisma migrate dev",
     "build": "prisma generate && tsup",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "webhook:stripe": "stripe listen --forward-to localhost:5000/webhooks"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",
@@ -34,6 +35,7 @@
     "http-status": "^2.1.0",
     "jsonwebtoken": "^9.0.3",
     "prisma": "^7.9.1",
+    "stripe": "^22.5.0",
     "tsx": "^4.23.12",
     "zod": "^4.4.3"
   }

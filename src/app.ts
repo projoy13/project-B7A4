@@ -15,6 +15,7 @@ import reviewRouter from "./modules/review/review.route";
 // import gearRouter  from "./modules/gear/gear.route";
 
 const app: Application = express();
+// app.post("/")
 
 app.use(
   cors({

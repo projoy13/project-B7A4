@@ -1,5 +1,8 @@
+import type { Request, Response } from "express";
 import prisma from "../../lib/prisma";
 import { AppError } from "../../utils/app.error";
+import { catchAsync } from "../../utils/catch-async";
+import { sendResponse } from "../../utils/send-response";
 import type { ICreateRental, IUpdateRentalStatus } from "./rental.interface";
 
 const createRental = async (payload: ICreateRental) => {
@@ -181,21 +184,11 @@ const createRental = async (payload: ICreateRental) => {
 
 // Get all rental orders
 const getAllRentals = async () => {
-  const result =
-    await prisma.rentalOrder.findMany({
-      include: {
-        items: {
-          include: {
-            gearItem: true,
-          },
-        },
-        payment: true,
-      },
+  console.log("RENTAL SERVICE STARTED");
 
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+  const result = await prisma.rentalOrder.findMany();
+
+  console.log("PRISMA QUERY FINISHED");
 
   return result;
 };

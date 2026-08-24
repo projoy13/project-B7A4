@@ -1,16 +1,21 @@
 import type { Request, Response } from "express";
+import Stripe from "stripe";
 import httpStatus from "http-status";
 
 import { catchAsync } from "../../utils/catch-async";
 import { AppError } from "../../utils/app.error";
 import { sendResponse } from "../../utils/send-response";
-
+import config from "../../config";
 import { PaymentService } from "./payment.service";
+import { stripe } from "../../lib/stripe";
 
 const createPayment = catchAsync(
   async (req: Request, res: Response) => {
+    const { rentalOrderId } = req.body;
+
     const result = await PaymentService.createPayment(
-      req.body
+      req.user!.id,
+      rentalOrderId
     );
 
     sendResponse(
@@ -24,9 +29,28 @@ const createPayment = catchAsync(
   }
 );
 
+const checkout = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params as { id: string };
+
+    const result =
+      await PaymentService.createCheckoutSession(
+        req.user!.id,
+        id
+      );
+
+    sendResponse(res, {
+      message:
+        "Stripe checkout session created successfully",
+      data: result,
+    });
+  }
+);
+
 const getAllPayments = catchAsync(
   async (req: Request, res: Response) => {
-    const result = await PaymentService.getAllPayments();
+    const result =
+      await PaymentService.getAllPayments();
 
     sendResponse(res, {
       message: "Payments retrieved successfully",
@@ -42,13 +66,6 @@ const getSinglePayment = catchAsync(
     const result =
       await PaymentService.getSinglePayment(id);
 
-    if (!result) {
-      throw new AppError(
-        404,
-        "Payment not found"
-      );
-    }
-
     sendResponse(res, {
       message: "Payment retrieved successfully",
       data: result,
@@ -56,48 +73,45 @@ const getSinglePayment = catchAsync(
   }
 );
 
-const confirmPayment = catchAsync(
-  async (req: Request, res: Response) => {
-    const { id } = req.params as { id: string };
+const webhook = async (
+  req: Request,
+  res: Response
+) => {
+  const signature = req.headers["stripe-signature"];
 
-    const { status } = req.body;
-
-    if (
-      status !== "COMPLETED" &&
-      status !== "FAILED"
-    ) {
-      throw new AppError(
-        400,
-        "Invalid payment status"
-      );
-    }
-
-    const payment =
-      await PaymentService.getSinglePayment(id);
-
-    if (!payment) {
-      throw new AppError(
-        404,
-        "Payment not found"
-      );
-    }
-
-    const result =
-      await PaymentService.confirmPayment(
-        id,
-        status
-      );
-
-    sendResponse(res, {
-      message: "Payment status updated successfully",
-      data: result,
-    });
+  if (!signature) {
+    throw new AppError(
+      400,
+      "Missing Stripe signature"
+    );
   }
-);
+
+  let event: Stripe.Event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      signature,
+      config.STRIPE_WEBHOOK_SECRET
+    );
+  } catch {
+    throw new AppError(
+      400,
+      "Invalid webhook signature"
+    );
+  }
+
+  await PaymentService.handleStripeWebhook(event);
+
+  res.status(httpStatus.OK).json({
+    received: true,
+  });
+};
 
 export const PaymentController = {
   createPayment,
+  checkout,
   getAllPayments,
   getSinglePayment,
-  confirmPayment,
+  webhook,
 };

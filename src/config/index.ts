@@ -5,7 +5,7 @@ dotenv.config({
   path: path.join(process.cwd(), ".env"),
 });
 
-const config = {
+export const config = {
   NODE_ENV: process.env.NODE_ENV || "development",
 
   PORT: process.env.PORT || "5000",
@@ -27,6 +27,9 @@ const config = {
 
   jwt_refresh_expire_in:
     process.env.JWT_REFRESH_EXPIRE_IN || "7d",
+
+    STRIPE_SECRET_KEY:process.env.STRIPE_SECRET_KEY!,
+    STRIPE_WEBHOOK_SECRET:process.env.STRIPE_WEBHOOK_SECRET!
 };
 
-export default config;
+ export default config;
