@@ -1,6 +1,8 @@
 import prisma from "../../lib/prisma";
 import { AppError } from "../../utils/app.error";
+
 import { stripe } from "../../lib/stripe";
+
 import type Stripe from "stripe";
 
 const createPayment = async (
@@ -21,8 +23,15 @@ const createPayment = async (
     );
   }
 
- console.log("Rental customer ID:", rentalOrder.customerId);
-  console.log("Logged-in user ID:", userId);
+  console.log(
+    "Rental customer ID:",
+    rentalOrder.customerId
+  );
+
+  console.log(
+    "Logged-in user ID:",
+    userId
+  );
 
   // Make sure customer owns this rental
   if (rentalOrder.customerId !== userId) {
@@ -41,7 +50,10 @@ const createPayment = async (
     });
 
   if (existingPayment) {
-    if (existingPayment.status === "COMPLETED") {
+    if (
+      existingPayment.status ===
+      "COMPLETED"
+    ) {
       throw new AppError(
         409,
         "This rental order is already paid"
@@ -51,20 +63,20 @@ const createPayment = async (
     return existingPayment;
   }
 
-  const payment = await prisma.payment.create({
-    data: {
-      rentalOrderId,
-      transactionId: `pending_${Date.now()}`,
-      amount: rentalOrder.totalAmount,
-      method: "STRIPE",
-      provider: "STRIPE",
-      status: "PENDING",
-    },
-  });
+  const payment =
+    await prisma.payment.create({
+      data: {
+        rentalOrderId,
+        transactionId: `pending_${Date.now()}`,
+        amount: rentalOrder.totalAmount,
+        method: "STRIPE",
+        provider: "STRIPE",
+        status: "PENDING",
+      },
+    });
 
   return payment;
 };
-
 
 const createCheckoutSession = async (
   userId: string,
@@ -75,7 +87,6 @@ const createCheckoutSession = async (
       where: {
         id: paymentId,
       },
-
       include: {
         rentalOrder: true,
       },
@@ -90,7 +101,8 @@ const createCheckoutSession = async (
 
   // Check ownership
   if (
-    payment.rentalOrder.customerId !== userId
+    payment.rentalOrder.customerId !==
+    userId
   ) {
     throw new AppError(
       403,
@@ -98,7 +110,9 @@ const createCheckoutSession = async (
     );
   }
 
-  if (payment.status === "COMPLETED") {
+  if (
+    payment.status === "COMPLETED"
+  ) {
     throw new AppError(
       409,
       "Payment is already completed"
@@ -113,7 +127,8 @@ const createCheckoutSession = async (
 
       metadata: {
         paymentId: payment.id,
-        rentalOrderId: payment.rentalOrderId,
+        rentalOrderId:
+          payment.rentalOrderId,
       },
 
       success_url:
@@ -157,7 +172,6 @@ const createCheckoutSession = async (
   };
 };
 
-
 const getAllPayments = async () => {
   const result =
     await prisma.payment.findMany({
@@ -172,7 +186,6 @@ const getAllPayments = async () => {
 
   return result;
 };
-
 
 const getSinglePayment = async (
   id: string
@@ -198,7 +211,7 @@ const getSinglePayment = async (
   return result;
 };
 
-
+// Handle Stripe webhook
 const handleStripeWebhook = async (
   event: Stripe.Event
 ) => {
@@ -235,6 +248,7 @@ const handleStripeWebhook = async (
 
     await prisma.$transaction(
       async (tx) => {
+        // Update payment
         await tx.payment.update({
           where: {
             id: paymentId,
@@ -251,6 +265,7 @@ const handleStripeWebhook = async (
           },
         });
 
+        // Update rental order
         await tx.rentalOrder.update({
           where: {
             id: payment.rentalOrderId,
@@ -266,7 +281,6 @@ const handleStripeWebhook = async (
 
   return true;
 };
-
 
 export const PaymentService = {
   createPayment,

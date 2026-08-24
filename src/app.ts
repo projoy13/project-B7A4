@@ -1,4 +1,5 @@
 import express, { type Application } from "express";
+
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
@@ -12,18 +13,26 @@ import { categoryRouter } from "./modules/category/category.route";
 import { paymentRouter } from "./modules/payment/payment.route";
 import { rentalRouter } from "./modules/rental/rental.route";
 import reviewRouter from "./modules/review/review.route";
-// import gearRouter  from "./modules/gear/gear.route";
 
 const app: Application = express();
-// app.post("/")
 
 app.use(
   cors({
-    origin: process.env.APP_URL || "http://localhost:3000",
+    origin:
+      process.env.APP_URL || "http://localhost:3000",
     credentials: true,
   })
 );
 
+// Stripe webhook MUST come before express.json()
+app.use(
+  "/api/payments/webhook",
+  express.raw({
+    type: "application/json",
+  })
+);
+
+// Normal JSON parser
 app.use(express.json());
 
 app.use(
@@ -34,36 +43,33 @@ app.use(
 
 app.use(cookieParser());
 
-
-// auth
+// Auth
 app.use("/api/auth", authRoutes);
 
-// user
+// Users
 app.use("/api/admin/users", userRouter);
 
-// gear
+// Gear
 app.use("/api/gear", gearRouter);
 
-// gear categoty
+// Categories
 app.use("/api/categories", categoryRouter);
 
-// rentals
+// Rentals
 app.use("/api/rentals", rentalRouter);
 
-// payment
-app.use('/api/payments',paymentRouter)
+// Payments
+app.use("/api/payments", paymentRouter);
 
-// review
+// Reviews
 app.use("/api/reviews", reviewRouter);
 
 app.get("/", (_req, res) => {
   res.send("GearUp server is running");
 });
 
-
 // Not Found
 app.use(notFound);
-
 
 // Global Error Handler
 app.use(globalErrorHandler);
