@@ -4,6 +4,7 @@ import httpStatus from "http-status";
 import { catchAsync } from "../../utils/catch-async";
 import { sendResponse } from "../../utils/send-response";
 import { userService } from "./user.service";
+import { AppError } from "../../utils/app.error";
 
 const getUsers = catchAsync(
   async (req: Request, res: Response) => {
@@ -41,9 +42,13 @@ const updateUserStatus = catchAsync(
 );
 const getMe = catchAsync(
   async (req: Request, res: Response) => {
-    const userId = req.user?.userId;
+    const userId = req.user?.id;
 
-    const user = await userService.getMe(userId);
+    if(!userId){
+      throw new AppError(401,"user not authinticated")
+    }
+
+    const user = await userService.getMe(userId!);
 
     sendResponse(
       res,
