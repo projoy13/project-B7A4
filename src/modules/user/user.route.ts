@@ -21,4 +21,10 @@ userRouter.patch(
   userController.updateUserStatus
 );
 
+userRouter.get(
+  "/me",
+  auth("CUSTOMER", "PROVIDER", "ADMIN"),
+  userController.getMe
+);
+
 export default userRouter;

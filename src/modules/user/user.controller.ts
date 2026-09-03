@@ -39,8 +39,25 @@ const updateUserStatus = catchAsync(
     );
   }
 );
+const getMe = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = req.user?.userId;
+
+    const user = await userService.getMe(userId);
+
+    sendResponse(
+      res,
+      {
+        message: "User retrieved successfully",
+        data: user,
+      },
+      httpStatus.OK
+    );
+  }
+);
 
 export const userController = {
   getUsers,
   updateUserStatus,
+  getMe
 };

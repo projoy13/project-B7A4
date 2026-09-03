@@ -58,8 +58,31 @@ const updateUserStatus = async (
 
   return updatedUser;
 };
+const getMe = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return user;
+};
 
 export const userService = {
   getUsers,
   updateUserStatus,
+  getMe
 };

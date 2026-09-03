@@ -49,6 +49,8 @@ app.use("/api/auth", authRoutes);
 // Users
 app.use("/api/admin/users", userRouter);
 
+app.use("/api/users",userRouter)
+
 // Gear
 app.use("/api/gear", gearRouter);
 
