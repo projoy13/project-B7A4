@@ -48,10 +48,46 @@ const loginUser = catchAsync(
     );
   }
 );
+
+const refreshToken = catchAsync(
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return next(
+        new Error("Refresh token is required")
+      );
+    }
+
+    const result = await authService.refreshToken(
+      refreshToken
+    );
+
+    sendResponse(
+      res,
+      {
+        message: "Access token refreshed successfully",
+        data: result,
+      },
+      httpStatus.OK
+    );
+  }
+);
+
 const getMe = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     if (!req.user) {
-      return next(new Error("User is not authenticated"));
+      return next(
+        new Error("User is not authenticated")
+      );
     }
 
     const result = await authService.getMe(
@@ -72,5 +108,6 @@ const getMe = catchAsync(
 export const authController = {
   registerUser,
   loginUser,
-  getMe
+  refreshToken,
+  getMe,
 };

@@ -139,9 +139,75 @@ const getMe = async (id: string) => {
 
   return user;
 };
+const refreshToken = async (token: string) => {
+  let decodedToken;
+
+  try {
+    decodedToken = jwtUtils.verifyToken(
+      token,
+      config.jwt_refresh_secret
+    );
+  } catch (error) {
+    throw new AppError(
+      401,
+      "Invalid or expired refresh token"
+    );
+  }
+
+  if (
+    typeof decodedToken === "string" ||
+    !decodedToken.id
+  ) {
+    throw new AppError(
+      401,
+      "Invalid refresh token"
+    );
+  }
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: decodedToken.id as string,
+    },
+  });
+
+  if (!user) {
+    throw new AppError(
+      404,
+      "User not found"
+    );
+  }
+
+  if (user.status === "SUSPENDED") {
+    throw new AppError(
+      403,
+      "Your account has been suspended"
+    );
+  }
+
+  const jwtPayload = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  };
+
+  const accessToken = jwtUtils.createToken(
+    jwtPayload,
+    config.jwt_access_secret,
+    {
+      expiresIn:
+        config.jwt_access_expire_in as StringValue,
+    }
+  );
+
+  return {
+    accessToken,
+  };
+};
 
 export const authService = {
   registerUser,
   loginUser,
-  getMe
+  getMe,
+  refreshToken
 };
