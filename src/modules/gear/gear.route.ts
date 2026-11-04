@@ -10,7 +10,7 @@ import {
   gearIdSchema,
 } from "./gear.validation";
 
-export const gearRouter = Router();
+export const gearRouter: Router = Router();
 
 
 // Create gear item
@@ -25,7 +25,7 @@ gearRouter.post(
 // Get all gear items
 gearRouter.get(
   "/",
-  auth(),
+  
   GearController.getAllGearItems
 );
 
@@ -33,7 +33,7 @@ gearRouter.get(
 // Get single gear item
 gearRouter.get(
   "/:id",
-  auth(),
+  
   validateRequest(gearIdSchema),
   GearController.getSingleGearItem
 );
@@ -51,7 +51,7 @@ gearRouter.patch(
 // Delete gear item
 gearRouter.delete(
   "/:id",
-  auth("PROVIDER"),
+  auth("PROVIDER","ADMIN"),
   validateRequest(gearIdSchema),
   GearController.deleteGearItem
 );

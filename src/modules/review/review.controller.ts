@@ -29,6 +29,7 @@ const createReview = catchAsync(
     sendResponse(
       res,
       {
+        success: true,
         message:
           "Review created successfully",
         data: result,
@@ -52,6 +53,7 @@ const getAllReviews = catchAsync(
       await ReviewService.getAllReviews();
 
     sendResponse(res, {
+      success: true,
       message:
         "Reviews retrieved successfully",
       data: result,
@@ -80,6 +82,7 @@ const getReviewsByGear = catchAsync(
       );
 
     sendResponse(res, {
+      success: true,
       message:
         "Gear reviews retrieved successfully",
       data: result,
@@ -108,6 +111,7 @@ const getSingleReview = catchAsync(
       );
 
     sendResponse(res, {
+      success: true,
       message:
         "Review retrieved successfully",
       data: result,
@@ -138,6 +142,7 @@ const updateReview = catchAsync(
       );
 
     sendResponse(res, {
+      success: true,
       message:
         "Review updated successfully",
       data: result,
@@ -169,6 +174,7 @@ const deleteReview = catchAsync(
     sendResponse(
       res,
       {
+        success: true,
         message:
           "Review deleted successfully",
         data: null,

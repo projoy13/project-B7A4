@@ -1,6 +1,5 @@
 import bcrypt from "bcryptjs";
 import prisma from "../../lib/prisma";
-import type { StringValue } from "ms";
 
 import type {
   ILoginUser,
@@ -96,7 +95,7 @@ const loginUser = async (
     jwtPayload,
     config.jwt_access_secret,
     {
-      expiresIn: config.jwt_access_expire_in as StringValue,
+      expiresIn: config.jwt_access_expire_in as any,
     }
   );
 
@@ -104,7 +103,7 @@ const loginUser = async (
     jwtPayload,
     config.jwt_refresh_secret,
     {
-      expiresIn: config.jwt_refresh_expire_in as StringValue,
+      expiresIn: config.jwt_refresh_expire_in as any,
     }
   );
 
@@ -140,10 +139,12 @@ const getMe = async (id: string) => {
   return user;
 };
 const refreshToken = async (token: string) => {
-  let decodedToken;
+  let verificationResult: Awaited<
+    ReturnType<typeof jwtUtils.verifyToken>
+  >;
 
   try {
-    decodedToken = jwtUtils.verifyToken(
+    verificationResult = await jwtUtils.verifyToken(
       token,
       config.jwt_refresh_secret
     );
@@ -153,6 +154,15 @@ const refreshToken = async (token: string) => {
       "Invalid or expired refresh token"
     );
   }
+
+  if (!verificationResult.success || !verificationResult.data) {
+    throw new AppError(
+      401,
+      "Invalid or expired refresh token"
+    );
+  }
+
+  const decodedToken = verificationResult.data;
 
   if (
     typeof decodedToken === "string" ||
@@ -196,7 +206,7 @@ const refreshToken = async (token: string) => {
     config.jwt_access_secret,
     {
       expiresIn:
-        config.jwt_access_expire_in as StringValue,
+        config.jwt_access_expire_in as any,
     }
   );
 

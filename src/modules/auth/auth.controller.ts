@@ -20,6 +20,7 @@ const registerUser = catchAsync(
     sendResponse(
       res,
       {
+        success:true,
         message: "User registered successfully",
         data: result,
       },
@@ -41,6 +42,7 @@ const loginUser = catchAsync(
     sendResponse(
       res,
       {
+        success: true,
         message: "User logged in successfully",
         data: loginResult,
       },
@@ -70,6 +72,7 @@ const refreshToken = catchAsync(
     sendResponse(
       res,
       {
+        success:true,
         message: "Access token refreshed successfully",
         data: result,
       },
@@ -97,6 +100,7 @@ const getMe = catchAsync(
     sendResponse(
       res,
       {
+        success:true,
         message: "User profile retrieved successfully",
         data: result,
       },

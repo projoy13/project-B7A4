@@ -6,7 +6,7 @@ import { auth } from "../../middleware/auth";
 import { validateRequest } from "../../middleware/validate.request";
 import { createReviewSchema, updateReviewSchema } from "./review.validation";
 
-const reviewRouter = Router();
+const reviewRouter: Router = Router();
 
 
 // ===============================

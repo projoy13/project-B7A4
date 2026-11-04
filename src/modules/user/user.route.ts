@@ -6,7 +6,7 @@ import { validateRequest } from "../../middleware/validate.request";
 import { updateUserStatusSchema } from "./user.validation";
 // import { updateUserStatusSchema } from "./user.validation";
 
-const userRouter = Router();
+const userRouter: Router = Router();
 
 userRouter.get(
   "/",

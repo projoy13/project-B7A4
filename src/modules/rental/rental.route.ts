@@ -4,7 +4,7 @@ import { auth } from "../../middleware/auth";
 import { validateRequest } from "../../middleware/validate.request";
 import { createRentalSchema, updateRentalStatusSchema } from "./rental.validation";
 
-export const rentalRouter = Router();
+export const rentalRouter: Router = Router();
 
 rentalRouter.post(
   "/",

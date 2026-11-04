@@ -13,6 +13,7 @@ const getUsers = catchAsync(
     sendResponse(
       res,
       {
+        success:true,
         message: "Users retrieved successfully",
         data: users,
       },
@@ -33,6 +34,7 @@ const updateUserStatus = catchAsync(
     sendResponse(
       res,
       {
+         success:true,
         message: "User status updated successfully",
         data: result,
       },
@@ -53,6 +55,7 @@ const getMe = catchAsync(
     sendResponse(
       res,
       {
+         success:true,
         message: "User retrieved successfully",
         data: user,
       },

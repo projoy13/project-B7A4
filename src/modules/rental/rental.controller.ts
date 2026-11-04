@@ -10,13 +10,15 @@ import prisma from "../../lib/prisma";
 
 const createRental = catchAsync(
   async (req: Request, res: Response) => {
-    const result = await RentalService.createRental(
-      req.body
-    );
+    const result = await RentalService.createRental({
+      ...req.body,
+      customerId: req.user!.id,
+  });
 
     sendResponse(
       res,
       {
+        success: true,
         message: "Rental order created successfully",
         data: result,
       },
@@ -34,6 +36,7 @@ const getAllRentals = catchAsync(
     console.log("RENTALS RECEIVED:", result.length);
 
     sendResponse(res, {
+      success: true,
       message: "Rental orders retrieved successfully",
       data: result,
     });
@@ -55,6 +58,7 @@ const getSingleRental = catchAsync(
     }
 
     sendResponse(res, {
+      success: true,
       message: "Rental order retrieved successfully",
       data: result,
     });
@@ -71,6 +75,7 @@ const updateRentalStatus = catchAsync(
       );
 
     sendResponse(res, {
+      success: true,
       message: "Rental status updated successfully",
       data: result,
     });

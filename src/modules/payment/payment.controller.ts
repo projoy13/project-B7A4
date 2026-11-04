@@ -25,6 +25,7 @@ const createPayment = catchAsync(
     sendResponse(
       res,
       {
+        success: true,
         message: "Payment created successfully",
         data: result,
       },
@@ -46,6 +47,7 @@ const checkout = catchAsync(
       );
 
     sendResponse(res, {
+      success: true,
       message:
         "Stripe checkout session created successfully",
       data: result,
@@ -59,6 +61,7 @@ const getAllPayments = catchAsync(
       await PaymentService.getAllPayments();
 
     sendResponse(res, {
+      success: true,
       message: "Payments retrieved successfully",
       data: result,
     });
@@ -75,6 +78,7 @@ const getSinglePayment = catchAsync(
       await PaymentService.getSinglePayment(id);
 
     sendResponse(res, {
+      success: true,
       message: "Payment retrieved successfully",
       data: result,
     });

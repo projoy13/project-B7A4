@@ -1,6 +1,8 @@
+
 import jwt, {
   type Secret,
   type SignOptions,
+  type JwtPayload,
 } from "jsonwebtoken";
 
 const createToken = (
@@ -11,11 +13,24 @@ const createToken = (
   return jwt.sign(payload, secret, options);
 };
 
-const verifyToken = (
+const verifyToken = async (
   token: string,
   secret: Secret
 ) => {
-  return jwt.verify(token, secret);
+  try {
+    const decoded = jwt.verify(token, secret);
+
+    return {
+      success: true,
+      data: decoded,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      data: null,
+      message: "Invalid or expired token",
+    };
+  }
 };
 
 export const jwtUtils = {

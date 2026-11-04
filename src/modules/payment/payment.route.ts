@@ -8,7 +8,7 @@ import { validateRequest } from "../../middleware/validate.request";
 
 import { paymentValidation } from "./payment.validation";
 
-export const paymentRouter = Router();
+export const paymentRouter: Router = Router();
 
 // Create payment
 paymentRouter.post(
