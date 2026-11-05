@@ -132,10 +132,10 @@ const createCheckoutSession = async (
       },
 
      success_url:
-  "http://localhost:3000/payment/success?session_id={CHECKOUT_SESSION_ID}",
+  "http://localhost:3000/MYrentals?/payment=success",
 
 cancel_url:
-  "http://localhost:3000/payment/cancel",
+  "http://localhost:3000/Gears",
 
       line_items: [
         {
