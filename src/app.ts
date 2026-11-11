@@ -13,6 +13,7 @@ import { categoryRouter } from "./modules/category/category.route";
 import { paymentRouter } from "./modules/payment/payment.route";
 import { rentalRouter } from "./modules/rental/rental.route";
 import reviewRouter from "./modules/review/review.route";
+import { providerRouter } from "./modules/provider/provider.route";
 
 const app: Application = express();
 
@@ -59,6 +60,9 @@ app.use("/api/categories", categoryRouter);
 
 // Rentals
 app.use("/api/rentals", rentalRouter);
+
+// provider dashboard
+app.use("/api", providerRouter);
 
 // Payments
 app.use("/api/payments", paymentRouter);

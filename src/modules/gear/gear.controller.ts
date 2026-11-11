@@ -8,12 +8,19 @@ import { sendResponse } from "../../utils/send-response";
 import { AppError } from "../../utils/app.error";
 
 const createGearItem = catchAsync(
+
   async (req: Request, res: Response) => {
-    const result = await GearService.createGearItem(req.body);
+    const providerId=req.user!.id
+    const result = await GearService.createGearItem({
+
+      ...req.body,
+        providerId,
+    });
 
     sendResponse(
       res,
       {
+        success:true,
         message: "Gear item created successfully",
         data: result,
       },
@@ -24,14 +31,27 @@ const createGearItem = catchAsync(
 
 const getAllGearItems = catchAsync(
   async (req: Request, res: Response) => {
-    const result = await GearService.getAllGearItems();
+    const result = await GearService.getAllGearItems(req.query);
 
     sendResponse(res, {
+      success:true,
       message: "Gear items retrieved successfully",
       data: result,
     });
   }
 );
+
+const getMyGear=catchAsync(
+  async(req:Request,res:Response)=>{
+    const providerId=req.user!.id;
+    const result=await GearService.getMyGear(providerId)
+  
+  sendResponse(res,{
+    success:true,
+    message:"gear items retrived successfully",
+    data:result,
+  })
+})
 
 const getSingleGearItem = catchAsync(
   async (req: Request, res: Response) => {
@@ -44,6 +64,7 @@ const getSingleGearItem = catchAsync(
     }
 
     sendResponse(res, {
+      success:true,
       message: "Gear item retrieved successfully",
       data: result,
     });
@@ -66,6 +87,7 @@ const updateGearItem = catchAsync(
     );
 
     sendResponse(res, {
+      success:true,
       message: "Gear item updated successfully",
       data: result,
     });
@@ -85,6 +107,7 @@ const deleteGearItem = catchAsync(
     await GearService.deleteGearItem(id);
 
     sendResponse(res, {
+      success:true,
       message: "Gear item deleted successfully",
       data: null,
     });
@@ -94,6 +117,7 @@ const deleteGearItem = catchAsync(
 export const GearController = {
   createGearItem,
   getAllGearItems,
+  getMyGear,
   getSingleGearItem,
   updateGearItem,
   deleteGearItem,

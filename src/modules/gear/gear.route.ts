@@ -12,32 +12,33 @@ import {
 
 export const gearRouter: Router = Router();
 
-
 // Create gear item
 gearRouter.post(
-  "/",
+  "/creat",
   auth("PROVIDER"),
   validateRequest(createGearSchema),
   GearController.createGearItem
 );
 
+// Get my gear - must be before /:id
+gearRouter.get(
+  "/mygear",
+  auth("PROVIDER"),
+  GearController.getMyGear
+);
 
 // Get all gear items
 gearRouter.get(
   "/",
-  
   GearController.getAllGearItems
 );
-
 
 // Get single gear item
 gearRouter.get(
   "/:id",
-  
   validateRequest(gearIdSchema),
   GearController.getSingleGearItem
 );
-
 
 // Update gear item
 gearRouter.patch(
@@ -47,11 +48,10 @@ gearRouter.patch(
   GearController.updateGearItem
 );
 
-
 // Delete gear item
 gearRouter.delete(
   "/:id",
-  auth("PROVIDER","ADMIN"),
+  auth("PROVIDER", "ADMIN"),
   validateRequest(gearIdSchema),
   GearController.deleteGearItem
 );

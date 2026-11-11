@@ -82,9 +82,27 @@ const updateRentalStatus = catchAsync(
   }
 );
 
+const getMyrentals = catchAsync(
+  async (req: Request, res: Response) => {
+    console.log("MY RENTALS ROUTE WORKING");
+
+    const customerId = req.user!.id;
+
+    console.log("CUSTOMER ID:", customerId);
+
+    const result = await RentalService.getMyrentals(customerId);
+
+    sendResponse(res, {
+      success: true,
+      message: "Your rentals retrieved successfully",
+      data: result,
+    });
+  }
+);
 export const RentalController = {
   createRental,
   getAllRentals,
   getSingleRental,
-  updateRentalStatus
+  updateRentalStatus,
+  getMyrentals,
 };

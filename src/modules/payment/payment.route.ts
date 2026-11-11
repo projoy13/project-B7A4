@@ -14,19 +14,14 @@ export const paymentRouter: Router = Router();
 paymentRouter.post(
   "/create",
   auth("CUSTOMER"),
-  validateRequest(
-    paymentValidation.createPaymentSchema
-  ),
+  validateRequest(paymentValidation.createPaymentSchema),
   PaymentController.createPayment
 );
 
-// Create Stripe checkout session
 paymentRouter.post(
   "/checkout/:id",
   auth("CUSTOMER"),
-  validateRequest(
-    paymentValidation.paymentIdParamsSchema
-  ),
+  validateRequest(paymentValidation.paymentIdParamsSchema),
   PaymentController.checkout
 );
 

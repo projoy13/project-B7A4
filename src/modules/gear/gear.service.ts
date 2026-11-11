@@ -1,6 +1,9 @@
 // import { prisma } from "../../lib/prisma";
 
+// import type { Prisma } from "../../../prisma/generated/prisma/client";
+import type { Prisma } from "../../../prisma/src/generated/prisma/client";
 import prisma from "../../lib/prisma";
+import type { Ipostquery } from "./gear interface";
 
 const createGearItem = async (payload: {
   name: string;
@@ -19,15 +22,65 @@ const createGearItem = async (payload: {
   return result;
 };
 
-const getAllGearItems = async () => {
-  const result = await prisma.gearItem.findMany({
+const getAllGearItems = async (query: Ipostquery = {}) => {
+  const andCondition: Prisma.GearItemWhereInput[] = [];
+
+  if (query.searchTerm?.trim()) {
+    andCondition.push({
+      OR: [
+        {
+          name: {
+            contains: query.searchTerm.trim(),
+            mode: "insensitive",
+          },
+        },
+        {
+          description: {
+            contains: query.searchTerm.trim(),
+            mode: "insensitive",
+          },
+        },
+        {
+          brand: {
+            contains: query.searchTerm.trim(),
+            mode: "insensitive",
+          },
+        },
+      ],
+    });
+  }
+
+  return prisma.gearItem.findMany({
+    where: {
+      AND: andCondition,
+    },
     include: {
-      provider: true,
+      provider: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
+      },
       category: true,
     },
   });
+};
 
-  return result;
+
+const getMyGear = async (providerId: string) => {
+  return await prisma.gearItem.findMany({
+    where: {
+      providerId: providerId,
+    },
+    include: {
+      category: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 };
 
 const getSingleGearItem = async (id: string) => {
@@ -84,4 +137,5 @@ export const GearService = {
   getSingleGearItem,
   updateGearItem,
   deleteGearItem,
+  getMyGear
 };

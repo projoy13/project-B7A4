@@ -29,10 +29,6 @@ export const createGearSchema = z.object({
       .url("Invalid image URL")
       .optional(),
 
-    providerId: z
-      .string()
-      .uuid("Invalid provider ID"),
-
     categoryId: z
       .string()
       .uuid("Invalid category ID"),

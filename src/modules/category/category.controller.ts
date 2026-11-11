@@ -13,6 +13,7 @@ const createCategory = catchAsync(
     sendResponse(
       res,
       {
+        success:true,
         message: "Category created successfully",
         data: result,
       },
@@ -26,6 +27,7 @@ const getAllCategories = catchAsync(
     const result = await CategoryService.getAllCategories();
 
     sendResponse(res, {
+      success:true,
       message: "Categories retrieved successfully",
       data: result,
     });
@@ -43,6 +45,7 @@ const getSingleCategory = catchAsync(
     }
 
     sendResponse(res, {
+      success:true,
       message: "Category retrieved successfully",
       data: result,
     });
@@ -65,6 +68,7 @@ const updateCategory = catchAsync(
     );
 
     sendResponse(res, {
+      success:true,
       message: "Category updated successfully",
       data: result,
     });
@@ -84,6 +88,7 @@ const deleteCategory = catchAsync(
     await CategoryService.deleteCategory(id);
 
     sendResponse(res, {
+      success:true,
       message: "Category deleted successfully",
       data: null,
     });

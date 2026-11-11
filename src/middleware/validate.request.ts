@@ -1,8 +1,9 @@
+
 import type { RequestHandler } from "express";
-import { z } from "zod";
+import { z, type ZodType } from "zod";
 
 export const validateRequest = (
-  schema: z.ZodType
+  schema: ZodType
 ): RequestHandler => {
   return (req, res, next) => {
     const result = schema.safeParse({
@@ -20,11 +21,7 @@ export const validateRequest = (
       });
     }
 
-    // Only update body.
-    // req.params and req.query can be read directly
-    // from Express and should not be reassigned.
     req.body = (result.data as { body: unknown }).body;
-
     next();
   };
 };

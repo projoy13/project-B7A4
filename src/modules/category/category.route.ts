@@ -9,7 +9,7 @@ import {
   categoryIdSchema,
 } from "./category.validation";
 
-export const categoryRouter = Router();
+export const categoryRouter: ReturnType<typeof Router> = Router();
 
 categoryRouter.post(
   "/",
