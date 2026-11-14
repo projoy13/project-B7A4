@@ -6,21 +6,15 @@ import { sendResponse } from "../../utils/send-response";
 import { userService } from "./user.service";
 import { AppError } from "../../utils/app.error";
 
-const getUsers = catchAsync(
-  async (req: Request, res: Response) => {
-    const users = await userService.getUsers();
+const getUsers = catchAsync(async (req: Request, res: Response) => {
+  const result = await userService.getUsers(req.query);
 
-    sendResponse(
-      res,
-      {
-        success:true,
-        message: "Users retrieved successfully",
-        data: users,
-      },
-      httpStatus.OK
-    );
-  }
-);
+  sendResponse(res, {
+    success: true,
+    message: "Users retrieved successfully",
+    data: result,
+  });
+});
 
 const updateUserStatus = catchAsync(
   async (req: Request, res: Response) => {

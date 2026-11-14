@@ -8,6 +8,8 @@ import { updateUserStatusSchema } from "./user.validation";
 
 const userRouter: Router = Router();
 
+
+// get all users
 userRouter.get(
   "/",
   auth("ADMIN"),

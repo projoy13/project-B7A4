@@ -68,11 +68,11 @@ const updateRentalStatus = catchAsync(
   async (req: Request, res: Response) => {
     const { id } = req.params as { id: string };
 
-    const result =
-      await RentalService.updateRentalStatus(
-        id,
-        req.body
-      );
+    const result = await RentalService.updateRentalStatus(
+  id,
+  req.user!.id,
+  req.body
+);
 
     sendResponse(res, {
       success: true,
@@ -99,10 +99,28 @@ const getMyrentals = catchAsync(
     });
   }
 );
+
+
+const getProviderOrders = catchAsync(async (req: Request, res: Response) => {
+  const providerId = req.user!.id;
+
+  console.log("CONTROLLER PROVIDER ID:", providerId);
+
+  const result = await RentalService.getProviderorders(providerId);
+
+  sendResponse(res, {
+    success: true,
+    message: "Provider orders retrieved successfully",
+    data: result,
+  });
+});
+
+
 export const RentalController = {
   createRental,
   getAllRentals,
   getSingleRental,
   updateRentalStatus,
   getMyrentals,
+  getProviderOrders
 };

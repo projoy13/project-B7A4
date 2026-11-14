@@ -223,21 +223,34 @@ const getSingleRental = async (id: string) => {
 
 const updateRentalStatus = async (
   id: string,
+  providerId: string,
   payload: IUpdateRentalStatus
 ) => {
-  const rental = await prisma.rentalOrder.findUnique({
+  const rental = await prisma.rentalOrder.findFirst({
     where: {
       id,
+      items: {
+        some: {
+          gearItem: {
+            is: {
+              providerId: providerId,
+            },
+          },
+        },
+      },
     },
   });
 
   if (!rental) {
-    throw new AppError(404, "Rental order not found");
+    throw new AppError(
+      404,
+      "Rental order not found or you do not have permission to update it"
+    );
   }
 
   const result = await prisma.rentalOrder.update({
     where: {
-      id,
+      id: id,
     },
     data: {
       status: payload.status,
@@ -246,6 +259,7 @@ const updateRentalStatus = async (
 
   return result;
 };
+
 const getMyrentals=async(customerId:string)=>{
   const result=await prisma.rentalOrder.findMany({
     where:{
@@ -265,10 +279,92 @@ const getMyrentals=async(customerId:string)=>{
   })
   return result
 }
+
+
+
+
+
+
+// th provider can see whic gear customer rented
+
+const getProviderorders = async (providerId: string) => {
+  // 1. Find provider's gear
+  const providerGears = await prisma.gearItem.findMany({
+    where: {
+      providerId: providerId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  const gearIds = providerGears.map((gear) => gear.id);
+
+  // 2. Find rental items belonging to provider's gear
+  const rentalItems = await prisma.rentalItem.findMany({
+    where: {
+      gearItemId: {
+        in: gearIds,
+      },
+    },
+    select: {
+      rentalOrderId: true,
+      gearItemId: true,
+      quantity: true,
+    },
+  });
+
+  // 3. Get unique rental order IDs
+  const rentalOrderIds = [
+    ...new Set(rentalItems.map((item) => item.rentalOrderId)),
+  ];
+
+  // 4. Fetch complete rental orders
+  const orders = await prisma.rentalOrder.findMany({
+    where: {
+      id: {
+        in: rentalOrderIds,
+      },
+    },
+    include: {
+      customer: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      items: {
+        where: {
+          gearItemId: {
+            in: gearIds,
+          },
+        },
+        include: {
+          gearItem: true,
+        },
+      },
+      payment: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return orders;
+};
+
+
+
+
+
+
+
 export const RentalService = {
   createRental,
   getAllRentals,
   getSingleRental,
   updateRentalStatus,
-  getMyrentals
+  getMyrentals,
+   getProviderorders
 };

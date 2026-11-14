@@ -1,13 +1,48 @@
 import prisma from "../../lib/prisma";
-import { UserStatus } from "../../../prisma/generated/prisma/enums";
-import type { IUpdateUserStatus } from "./user.interface";
+import { Role, UserStatus } from "../../../prisma/generated/prisma/enums";
+import type { IUpdateUserStatus, Iuserquery } from "./user.interface";
+import type { Prisma } from "../../../prisma/generated/prisma/client";
 
-const getUsers = async () => {
-  const users = await prisma.user.findMany({
+
+const getUsers = async (query: Iuserquery = {}) => {
+  const andCondition: Prisma.UserWhereInput[] = [];
+
+  if (query.searchTerm?.trim()) {
+    const searchTerm = query.searchTerm.trim();
+    const matchingStatus = Object.values(UserStatus).find(
+      (status) => status.toLowerCase() === searchTerm.toLowerCase()
+    );
+    const matchingRole = Object.values(Role).find(
+      (role) => role.toLowerCase() === searchTerm.toLowerCase()
+    );
+
+    andCondition.push({
+      OR: [
+        {
+          name: {
+            contains: searchTerm,
+            mode: "insensitive",
+          },
+        },
+        {
+          email: {
+            contains: searchTerm,
+            mode: "insensitive",
+          },
+        },
+        ...(matchingRole ? [{ role: matchingRole }] : []),
+        ...(matchingStatus ? [{ status: matchingStatus }] : []),
+      ],
+    });
+  }
+
+  return prisma.user.findMany({
+    where: {
+      AND: andCondition,
+    },
     orderBy: {
       createdAt: "desc",
     },
-
     select: {
       id: true,
       name: true,
@@ -18,14 +53,14 @@ const getUsers = async () => {
       updatedAt: true,
     },
   });
-
-  return users;
 };
+
 
 const updateUserStatus = async (
   id: string,
   payload: IUpdateUserStatus
 ) => {
+  
   const user = await prisma.user.findUnique({
     where: {
       id,

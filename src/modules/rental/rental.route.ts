@@ -1,3 +1,4 @@
+
 import { Router } from "express";
 import { RentalController } from "./rental.controller";
 import { auth } from "../../middleware/auth";
@@ -19,7 +20,7 @@ rentalRouter.post(
 
 // 2. Get logged-in customer's rentals
 rentalRouter.get(
-  "/user/rental",
+  "/userRentals",
   auth("CUSTOMER"),
   RentalController.getMyrentals
 );
@@ -38,7 +39,14 @@ rentalRouter.patch(
   RentalController.updateRentalStatus
 );
 
-// 5. Get single rental (keep this last)
+// 5. Get provider orders
+rentalRouter.get(
+  "/provider/orders",
+  auth("PROVIDER"),
+  RentalController.getProviderOrders
+);
+
+// 6. Get single rental
 rentalRouter.get(
   "/:id",
   RentalController.getSingleRental
