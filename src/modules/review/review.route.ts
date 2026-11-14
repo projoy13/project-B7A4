@@ -73,5 +73,12 @@ reviewRouter.delete(
   ReviewController.deleteReview
 );
 
+reviewRouter.get(
+  "/my/gear/:gearItemId",
+  auth("CUSTOMER"),
+  ReviewController.getMyReviewByGear
+);
+
+
 
 export default reviewRouter;

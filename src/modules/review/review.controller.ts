@@ -184,6 +184,26 @@ const deleteReview = catchAsync(
   }
 );
 
+const getMyReviewByGear = catchAsync(
+  async (req: Request, res: Response) => {
+    const { gearItemId } = req.params as {
+      gearItemId: string;
+    };
+
+    const result = await ReviewService.getMyReviewByGear(
+      req.user!.id,
+      gearItemId
+    );
+
+    sendResponse(res, {
+      success: true,
+      message: "Your gear review retrieved successfully",
+      data: result,
+    });
+  }
+);
+
+
 
 export const ReviewController = {
   createReview,
@@ -192,4 +212,5 @@ export const ReviewController = {
   getSingleReview,
   updateReview,
   deleteReview,
+   getMyReviewByGear
 };

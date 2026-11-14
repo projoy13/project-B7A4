@@ -345,6 +345,31 @@ const deleteReview = async (
 };
 
 
+const getMyReviewByGear = async (
+  userId: string,
+  gearItemId: string
+) => {
+  const review = await prisma.review.findFirst({
+    where: {
+      userId,
+      gearItemId,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+      gearItem: true,
+    },
+  });
+
+  return review;
+};
+
+
+
 export const ReviewService = {
   createReview,
   getAllReviews,
@@ -352,4 +377,5 @@ export const ReviewService = {
   getSingleReview,
   updateReview,
   deleteReview,
+   getMyReviewByGear
 };
