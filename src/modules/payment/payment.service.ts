@@ -1,7 +1,8 @@
+
 import prisma from "../../lib/prisma";
 import { AppError } from "../../utils/app.error";
-
 import { stripe } from "../../lib/stripe";
+import config from "../../config";
 
 import type Stripe from "stripe";
 
@@ -17,23 +18,9 @@ const createPayment = async (
     });
 
   if (!rentalOrder) {
-    throw new AppError(
-      404,
-      "Rental order not found"
-    );
+    throw new AppError(404, "Rental order not found");
   }
 
-  console.log(
-    "Rental customer ID:",
-    rentalOrder.customerId
-  );
-
-  console.log(
-    "Logged-in user ID:",
-    userId
-  );
-
-  // Make sure customer owns this rental
   if (rentalOrder.customerId !== userId) {
     throw new AppError(
       403,
@@ -41,7 +28,6 @@ const createPayment = async (
     );
   }
 
-  // Check existing payment
   const existingPayment =
     await prisma.payment.findUnique({
       where: {
@@ -50,10 +36,7 @@ const createPayment = async (
     });
 
   if (existingPayment) {
-    if (
-      existingPayment.status ===
-      "COMPLETED"
-    ) {
+    if (existingPayment.status === "COMPLETED") {
       throw new AppError(
         409,
         "This rental order is already paid"
@@ -93,31 +76,21 @@ const createCheckoutSession = async (
     });
 
   if (!payment) {
-    throw new AppError(
-      404,
-      "Payment not found"
-    );
+    throw new AppError(404, "Payment not found");
   }
 
-  // Check ownership
-  if (
-    payment.rentalOrder.customerId !==
-    userId
-  ) {
+  if (payment.rentalOrder.customerId !== userId) {
     throw new AppError(
       403,
       "You are not authorized to pay for this order"
     );
   }
 
-  if (
-    payment.status === "COMPLETED"
-  ) {
-    throw new AppError(
-      409,
-      "Payment is already completed"
-    );
+  if (payment.status === "COMPLETED") {
+    throw new AppError(409, "Payment is already completed");
   }
+
+  const frontendUrl = config.APP_URL.replace(/\/+$/, "");
 
   const session =
     await stripe.checkout.sessions.create({
@@ -127,12 +100,12 @@ const createCheckoutSession = async (
 
       metadata: {
         paymentId: payment.id,
-        rentalOrderId:
-          payment.rentalOrderId,
+        rentalOrderId: payment.rentalOrderId,
       },
 
-  success_url: "http://localhost:3000/PaymentSuccess?session_id={CHECKOUT_SESSION_ID}",
-cancel_url: "http://localhost:3000/Myrentals",
+      success_url: `${frontendUrl}/PaymentSuccess?session_id={CHECKOUT_SESSION_ID}`,
+
+      cancel_url: `${frontendUrl}/myrentals`,
 
       line_items: [
         {
@@ -184,9 +157,7 @@ const getAllPayments = async () => {
   return result;
 };
 
-const getSinglePayment = async (
-  id: string
-) => {
+const getSinglePayment = async (id: string) => {
   const result =
     await prisma.payment.findUnique({
       where: {
@@ -199,28 +170,20 @@ const getSinglePayment = async (
     });
 
   if (!result) {
-    throw new AppError(
-      404,
-      "Payment not found"
-    );
+    throw new AppError(404, "Payment not found");
   }
 
   return result;
 };
 
-// Handle Stripe webhook
 const handleStripeWebhook = async (
   event: Stripe.Event
 ) => {
-  if (
-    event.type ===
-    "checkout.session.completed"
-  ) {
+  if (event.type === "checkout.session.completed") {
     const session =
       event.data.object as Stripe.Checkout.Session;
 
-    const paymentId =
-      session.metadata?.paymentId;
+    const paymentId = session.metadata?.paymentId;
 
     if (!paymentId) {
       throw new AppError(
@@ -237,43 +200,35 @@ const handleStripeWebhook = async (
       });
 
     if (!payment) {
-      throw new AppError(
-        404,
-        "Payment not found"
-      );
+      throw new AppError(404, "Payment not found");
     }
 
-    await prisma.$transaction(
-      async (tx) => {
-        // Update payment
-        await tx.payment.update({
-          where: {
-            id: paymentId,
-          },
+    await prisma.$transaction(async (tx) => {
+      await tx.payment.update({
+        where: {
+          id: paymentId,
+        },
 
-          data: {
-            status: "COMPLETED",
+        data: {
+          status: "COMPLETED",
 
-            transactionId:
-              session.payment_intent?.toString() ||
-              session.id,
+          transactionId:
+            session.payment_intent?.toString() || session.id,
 
-            paidAt: new Date(),
-          },
-        });
+          paidAt: new Date(),
+        },
+      });
 
-        // Update rental order
-        await tx.rentalOrder.update({
-          where: {
-            id: payment.rentalOrderId,
-          },
+      await tx.rentalOrder.update({
+        where: {
+          id: payment.rentalOrderId,
+        },
 
-          data: {
-            status: "PAID",
-          },
-        });
-      }
-    );
+        data: {
+          status: "PAID",
+        },
+      });
+    });
   }
 
   return true;
