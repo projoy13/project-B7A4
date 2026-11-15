@@ -20,6 +20,7 @@ const app: Application = express();
 const allowedOrigins = [
   "http://localhost:3000",
   "https://nextjs-bl6r3sn3l-md-abrar.vercel.app",
+  "https://nextjs-jet-tau-75.vercel.app",
 ];
 
 app.use(
