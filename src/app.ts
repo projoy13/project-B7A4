@@ -21,6 +21,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "https://nextjs-md-abrar.vercel.app",
   "https://nextjs-jet-tau-75.vercel.app",
+  "https://nextjs-git-main-md-abrar.vercel.app",
 ];
 
 app.use(
