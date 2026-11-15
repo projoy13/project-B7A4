@@ -19,7 +19,7 @@ const app: Application = express();
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://nextjs-dsa1hst6a-md-abrar.vercel.app",
+  "https://nextjs-bl6r3sn3l-md-abrar.vercel.app",
 ];
 
 app.use(
