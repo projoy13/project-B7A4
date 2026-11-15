@@ -1,3 +1,4 @@
+
 import type { ErrorRequestHandler } from "express";
 import { ZodError } from "zod";
 import { AppError } from "../utils/app.error";
@@ -13,6 +14,9 @@ export const globalErrorHandler: ErrorRequestHandler = (
   let statusCode = 500;
   let message = "Something went wrong";
   let errorDetails: unknown = null;
+
+  // Log the original error for debugging
+  console.error("GLOBAL ERROR:", err);
 
   // Zod validation error
   if (err instanceof ZodError) {
@@ -30,6 +34,13 @@ export const globalErrorHandler: ErrorRequestHandler = (
 
   // Prisma database errors
   else if (err instanceof Prisma.PrismaClientKnownRequestError) {
+
+    console.error("PRISMA DATABASE ERROR:", {
+      code: err.code,
+      message: err.message,
+      meta: err.meta,
+    });
+
     switch (err.code) {
       case "P2002":
         statusCode = 409;
@@ -92,12 +103,3 @@ export const globalErrorHandler: ErrorRequestHandler = (
     errorDetails,
   });
 };
-
-
-
-
-
-
-// intall zod
-// what is zod ?:input validation
-// npm i zod
